@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cello Bow Motion Explorer</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Cello Bow Motion Explorer</h1>
+    <p class="subtitle">Explore how bow speed, force, sounding point, and tilt shape a cello's tone — visually and audibly.</p>
+  </header>
+
+  <main class="app-main">
+    <section class="panel controls" aria-label="Bowing controls">
+      <h2>Bow controls</h2>
+
+      <div class="control-group">
+        <label for="stringSelect">String</label>
+        <div class="string-buttons" id="stringButtons" role="radiogroup" aria-label="String selection"></div>
+      </div>
+
+      <div class="control-group">
+        <label for="speedSlider">Bow speed <span class="value" id="speedValue"></span></label>
+        <input type="range" id="speedSlider" min="5" max="100" step="1" />
+        <div class="range-hint"><span>slow</span><span>fast</span></div>
+      </div>
+
+      <div class="control-group">
+        <label for="forceSlider">Bow force / weight <span class="value" id="forceValue"></span></label>
+        <input type="range" id="forceSlider" min="10" max="300" step="1" />
+        <div class="range-hint"><span>light</span><span>heavy</span></div>
+      </div>
+
+      <div class="control-group">
+        <label for="soundingPointSlider">Sounding point <span class="value" id="soundingPointValue"></span></label>
+        <input type="range" id="soundingPointSlider" min="1.5" max="12" step="0.1" />
+        <div class="range-hint"><span>sul ponticello (near bridge)</span><span>sul tasto (near fingerboard)</span></div>
+      </div>
+
+      <div class="control-group">
+        <label for="tiltSlider">Bow hair tilt <span class="value" id="tiltValue"></span></label>
+        <input type="range" id="tiltSlider" min="0" max="100" step="1" />
+        <div class="range-hint"><span>flat hair</span><span>on the edge</span></div>
+      </div>
+
+      <div class="control-group">
+        <label for="volumeSlider">Volume <span class="value" id="volumeValue"></span></label>
+        <input type="range" id="volumeSlider" min="0" max="100" step="1" />
+      </div>
+
+      <div class="control-buttons">
+        <button id="playButton" class="primary">Start bowing</button>
+        <button id="resetButton">Reset to clean tone</button>
+      </div>
+
+      <p class="hint">Sound requires a click to start (browser audio policy).</p>
+    </section>
+
+    <section class="panel visuals" aria-label="Bow and string visualization">
+      <div class="zone-badge" id="zoneBadge">
+        <span class="zone-dot" id="zoneDot"></span>
+        <span id="zoneLabel">Clear tone</span>
+      </div>
+      <canvas id="stringCanvas" class="viz-canvas" aria-label="String and bow animation"></canvas>
+
+      <h3>Schelleng diagram — playable force range</h3>
+      <canvas id="diagramCanvas" class="viz-canvas diagram-canvas" aria-label="Bow force vs sounding point diagram"></canvas>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <details>
+      <summary>What am I looking at? (the physics, briefly)</summary>
+      <p>
+        For a cello string to vibrate cleanly (in "Helmholtz motion"), the bow force has to sit within a range
+        that depends on bow speed and how far from the bridge you bow (the <strong>sounding point</strong>).
+        Too little force and the bow slips too easily &mdash; you get a thin, breathy <em>surface sound / whistle</em>.
+        Too much force and the string sticks and slips multiple times per cycle &mdash; a harsh <em>crunch</em>.
+        This relationship is classically summarized by the <strong>Schelleng diagram</strong>: a wedge-shaped region
+        of usable force that widens with bow speed and narrows as you bow further from the bridge.
+      </p>
+      <p class="disclaimer">
+        This app uses a simplified, pedagogically-tuned version of that relationship (not a precise acoustic
+        simulation) to make the trends explorable and audible.
+      </p>
+    </details>
+  </footer>
+
+  <script src="js/physics.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/visualizer.js"></script>
+  <script src="js/diagram.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
