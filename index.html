@@ -164,6 +164,64 @@
     </details>
   </section>
 
+  <section class="panel tuner-panel" aria-label="Microphone tuner and pitch practice">
+    <h2>Tuner &amp; pitch practice</h2>
+    <p class="hint">
+      Uses your microphone to detect pitch in real time and check it against a sequence of notes you enter.
+    </p>
+
+    <div class="control-buttons">
+      <button id="micToggleButton">Start listening</button>
+    </div>
+    <p class="status-line" id="micStatus">Not listening</p>
+
+    <div class="tuner-display">
+      <div class="tuner-readout">
+        <span class="tuner-note" id="tunerNote">––</span>
+        <span class="tuner-freq" id="tunerFreq">–– Hz</span>
+      </div>
+      <div class="tuner-meter">
+        <div class="tuner-track">
+          <div class="tuner-zone-green"></div>
+          <div class="tuner-center-line"></div>
+          <div class="tuner-needle" id="tunerNeedle"></div>
+        </div>
+        <div class="tuner-scale">
+          <span>‒50¢</span>
+          <span>in tune</span>
+          <span>+50¢</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="practice-section">
+      <label for="noteSequenceInput">Note sequence (e.g. from your sheet music)</label>
+      <textarea id="noteSequenceInput" rows="2" placeholder="e.g. C3 D3 E3 F3 G3 A3 B3 C4"></textarea>
+      <p class="hint">
+        Note names like <code>C3</code>, <code>F#4</code>, <code>Bb2</code>. Can't read sheet music directly —
+        if you share a photo of it in chat, I can transcribe it into this format for you.
+      </p>
+      <div class="control-buttons">
+        <button id="loadSequenceButton">Load sequence</button>
+        <label class="checkbox-label">
+          <input type="checkbox" id="autoAdvanceCheckbox" checked />
+          Auto-advance when in tune
+        </label>
+      </div>
+      <p class="hint" id="sequenceWarning"></p>
+
+      <div class="note-strip" id="noteStrip"></div>
+
+      <div class="sequence-controls">
+        <button id="prevNoteButton">← Prev</button>
+        <span id="sequenceProgress">No sequence loaded</span>
+        <button id="nextNoteButton">Next →</button>
+        <button id="resetSequenceButton">Reset</button>
+      </div>
+      <p class="practice-feedback" id="practiceFeedback"></p>
+    </div>
+  </section>
+
   <footer class="app-footer">
     <details>
       <summary>What am I looking at? (the physics, briefly)</summary>
@@ -191,6 +249,16 @@
         generic BLE scanner app.
       </p>
     </details>
+    <details>
+      <summary>About the tuner</summary>
+      <p>
+        Pitch detection uses your microphone and runs entirely in the browser (audio never leaves your device).
+        It needs HTTPS or localhost, same as the Bluetooth sensor above. Detection uses autocorrelation on the raw
+        waveform, tuned for the cello's range (roughly 55&ndash;1400 Hz) &mdash; very quiet or noisy input, or
+        multiple simultaneous notes (double stops/chords), won't track reliably since this only detects a single
+        pitch at a time.
+      </p>
+    </details>
   </footer>
 
   <script src="js/physics.js"></script>
@@ -201,6 +269,9 @@
   <script src="js/sensorFileParser.js"></script>
   <script src="js/bleConnector.js"></script>
   <script src="js/sensorChart.js"></script>
+  <script src="js/noteUtils.js"></script>
+  <script src="js/pitchDetector.js"></script>
+  <script src="js/micTuner.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

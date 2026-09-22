@@ -398,6 +398,173 @@ details.advanced input[type="text"] {
   margin: 8px 0 0;
 }
 
+.tuner-panel {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 28px;
+}
+
+.tuner-panel h2 {
+  margin-top: 0;
+  font-size: 1.05rem;
+  color: var(--wood-light);
+}
+
+.tuner-display {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin: 16px 0 22px;
+  padding: 16px 20px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.tuner-readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+}
+
+.tuner-note {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.tuner-freq {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.tuner-meter {
+  flex: 1;
+  min-width: 220px;
+}
+
+.tuner-track {
+  position: relative;
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff8f6b, #ffd27f 35%, #7cffb2 48%, #7cffb2 52%, #ffd27f 65%, #ff8f6b);
+  opacity: 0.9;
+}
+
+.tuner-zone-green {
+  position: absolute;
+  left: 45%;
+  width: 10%;
+  top: -3px;
+  bottom: -3px;
+  border-radius: 999px;
+  border: 2px solid rgba(124, 255, 178, 0.7);
+  box-sizing: border-box;
+}
+
+.tuner-center-line {
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  bottom: -6px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.tuner-needle {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 3px;
+  height: 30px;
+  background: #fff;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+  transition: left 0.08s linear;
+}
+
+.tuner-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+.practice-section textarea {
+  width: 100%;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 0.95rem;
+  resize: vertical;
+  margin-top: 6px;
+}
+
+.practice-section label {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.note-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0;
+}
+
+.note-chip {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.note-chip.current {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(255, 210, 127, 0.35);
+}
+
+.note-chip.correct {
+  border-color: var(--clean);
+  color: var(--clean);
+  background: rgba(124, 255, 178, 0.1);
+}
+
+.sequence-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.sequence-controls span {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  flex: 1;
+  text-align: center;
+}
+
+.practice-feedback {
+  margin: 10px 0 0;
+  font-size: 0.88rem;
+  color: var(--accent);
+  min-height: 1.2em;
+}
+
 .app-footer {
   max-width: 1200px;
   margin: 0 auto;

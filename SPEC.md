@@ -14,6 +14,7 @@ wrist-worn accelerometer/gyro sensor (WitMotion BLE).
 | Core app (visuals, audio, controls) | Any modern browser (Chrome, Firefox, Edge, Safari). No build step — open `index.html` directly, or serve statically. |
 | Sensor file playback | Any modern browser. No special requirements. |
 | Live Bluetooth streaming | Chrome or Edge, desktop or Android. Requires HTTPS or `localhost` (Web Bluetooth is blocked on plain HTTP and unavailable on iOS entirely). |
+| Microphone tuner | Chrome, Firefox, Edge, or Safari. Requires HTTPS or `localhost` (`getUserMedia` needs a secure context, but unlike Web Bluetooth it does work on iOS Safari). |
 
 ## 1. Bowing simulation
 
@@ -112,7 +113,47 @@ motion, not a reconstruction of absolute bow position — a single
 wrist-worn IMU can't disambiguate on-string bow position from other wrist
 movement.
 
-## 3. File structure
+## 3. Tuner & pitch practice
+
+### 3.1 Pitch detection (`js/pitchDetector.js`, `js/micTuner.js`)
+
+Captures microphone audio via `getUserMedia` into an `AnalyserNode`
+(`fftSize = 4096`), then runs normalized time-domain autocorrelation on
+each frame (processed at ~30 Hz) to estimate fundamental frequency:
+
+- Search range 55–1400 Hz (covers the cello's open strings through upper
+  positions/harmonics), with an RMS silence gate (`0.01`) below which no
+  pitch is reported.
+- Best-lag peak picking with parabolic interpolation for sub-sample lag
+  precision.
+- Detects one pitch at a time — not designed for double stops/chords.
+
+Detected frequency is converted to the nearest 12-TET note (A4 = 440 Hz)
+plus a cents deviation via `js/noteUtils.js`.
+
+### 3.2 Tuner display
+
+A live meter shows the detected note name, frequency, and a needle on a
+±50-cent scale with a highlighted "in tune" zone at the center.
+
+### 3.3 Note-sequence practice
+
+- Input: a text box accepting note names (`C3`, `F#4`, `Bb2`, etc.,
+  space/comma-separated), parsed by `js/noteUtils.js`. Unparseable tokens
+  are reported and skipped rather than blocking the whole sequence.
+- There is no sheet-music image/PDF recognition (OMR) built into the app —
+  transcribing printed notation into this text format is done outside the
+  app (e.g. manually, or by asking an assistant with image-reading
+  capability to transcribe a photo).
+- A note is marked correct once the detected pitch matches the target
+  note's MIDI number and stays within **±15 cents** for **~400 ms**
+  (debounces brief mistracking/noise). "Auto-advance when in tune" moves
+  to the next note automatically on a correct match; Prev/Next/Reset allow
+  manual navigation. Mismatch feedback distinguishes a wrong note (shown
+  as a semitone offset) from the right note out of tune (shown as cents
+  sharp/flat).
+
+## 4. File structure
 
 ```
 index.html              Page structure and controls
@@ -125,10 +166,13 @@ js/witmotionParser.js       WitMotion binary IMU packet decoder
 js/bleConnector.js          Web Bluetooth connection + characteristic discovery
 js/sensorFileParser.js      Recorded WitMotion text/CSV export parser
 js/sensorChart.js            Rolling accelerometer/gyro strip-chart
-js/main.js                    Wires controls, state, and the animation loop together
+js/noteUtils.js               Note name / MIDI / frequency conversions + sequence parsing
+js/pitchDetector.js            Autocorrelation-based pitch detection
+js/micTuner.js                  Microphone capture + pitch detection loop
+js/main.js                       Wires controls, state, and the animation loop together
 ```
 
-## 4. Non-goals / known limitations
+## 5. Non-goals / known limitations
 
 - The bow-force physics model is pedagogically tuned, not a calibrated
   acoustic simulation.
@@ -137,3 +181,7 @@ js/main.js                    Wires controls, state, and the animation loop toge
 - WitMotion GATT UUIDs are not fully standardized across every product
   line; the defaults target the BLE5.0 family (confirmed for WT9011DCL).
   Other models may need the manual UUID override.
+- No optical music recognition (reading notes from a photo/PDF of sheet
+  music) is built in — the practice sequence is entered as text.
+- Pitch detection is monophonic and can be thrown off by heavy background
+  noise, multiple simultaneous notes, or very quiet playing.

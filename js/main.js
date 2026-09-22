@@ -8,6 +8,8 @@
   var Ble = CelloApp.BleConnector;
   var SensorFile = CelloApp.SensorFile;
   var SensorChart = CelloApp.SensorChart;
+  var NoteUtils = CelloApp.NoteUtils;
+  var MicTuner = CelloApp.MicTuner;
 
   var stringCanvas = document.getElementById("stringCanvas");
   var diagramCanvas = document.getElementById("diagramCanvas");
@@ -57,6 +59,22 @@
   var sensitivitySlider = document.getElementById("sensitivitySlider");
   var sensitivityValue = document.getElementById("sensitivityValue");
   var rawMonitor = document.getElementById("rawMonitor");
+
+  var micToggleButton = document.getElementById("micToggleButton");
+  var micStatus = document.getElementById("micStatus");
+  var tunerNote = document.getElementById("tunerNote");
+  var tunerFreq = document.getElementById("tunerFreq");
+  var tunerNeedle = document.getElementById("tunerNeedle");
+  var noteSequenceInput = document.getElementById("noteSequenceInput");
+  var loadSequenceButton = document.getElementById("loadSequenceButton");
+  var autoAdvanceCheckbox = document.getElementById("autoAdvanceCheckbox");
+  var sequenceWarning = document.getElementById("sequenceWarning");
+  var noteStrip = document.getElementById("noteStrip");
+  var prevNoteButton = document.getElementById("prevNoteButton");
+  var nextNoteButton = document.getElementById("nextNoteButton");
+  var resetSequenceButton = document.getElementById("resetSequenceButton");
+  var sequenceProgress = document.getElementById("sequenceProgress");
+  var practiceFeedback = document.getElementById("practiceFeedback");
 
   var DEFAULTS = {
     stringId: "D",
@@ -370,6 +388,148 @@
 
   // ---- end wrist sensor wiring ----
 
+  // ---- Tuner + pitch practice ----
+
+  var IN_TUNE_CENTS = 15;
+  var SUSTAIN_MS = 400;
+
+  var practice = {
+    sequence: [],
+    index: 0,
+    correctFlags: [],
+    matchStartTime: null,
+  };
+
+  function renderNoteStrip() {
+    noteStrip.innerHTML = "";
+    practice.sequence.forEach(function (note, i) {
+      var chip = document.createElement("span");
+      chip.className = "note-chip";
+      if (i === practice.index) chip.classList.add("current");
+      if (practice.correctFlags[i]) chip.classList.add("correct");
+      chip.textContent = note.label;
+      noteStrip.appendChild(chip);
+    });
+    sequenceProgress.textContent = practice.sequence.length
+      ? "Note " + (practice.index + 1) + " / " + practice.sequence.length + ": " + practice.sequence[practice.index].label
+      : "No sequence loaded";
+  }
+
+  function setPracticeIndex(i) {
+    if (!practice.sequence.length) return;
+    practice.index = Math.max(0, Math.min(practice.sequence.length - 1, i));
+    practice.matchStartTime = null;
+    renderNoteStrip();
+  }
+
+  loadSequenceButton.addEventListener("click", function () {
+    var result = NoteUtils.parseSequence(noteSequenceInput.value);
+    if (result.invalid.length) {
+      sequenceWarning.textContent = "Couldn't parse: " + result.invalid.join(", ") + " — skipped.";
+    } else {
+      sequenceWarning.textContent = "";
+    }
+    practice.sequence = result.notes;
+    practice.index = 0;
+    practice.correctFlags = result.notes.map(function () {
+      return false;
+    });
+    practice.matchStartTime = null;
+    practiceFeedback.textContent = "";
+    renderNoteStrip();
+  });
+
+  prevNoteButton.addEventListener("click", function () {
+    setPracticeIndex(practice.index - 1);
+  });
+  nextNoteButton.addEventListener("click", function () {
+    setPracticeIndex(practice.index + 1);
+  });
+  resetSequenceButton.addEventListener("click", function () {
+    practice.index = 0;
+    practice.correctFlags = practice.sequence.map(function () {
+      return false;
+    });
+    practice.matchStartTime = null;
+    practiceFeedback.textContent = "";
+    renderNoteStrip();
+  });
+
+  function handlePitch(result) {
+    if (!result) {
+      tunerNote.textContent = "––";
+      tunerFreq.textContent = "–– Hz";
+      tunerNeedle.style.left = "50%";
+      practice.matchStartTime = null;
+      return;
+    }
+
+    tunerNote.textContent = result.label;
+    tunerFreq.textContent = result.freq.toFixed(1) + " Hz";
+    var clampedCents = Math.max(-50, Math.min(50, result.cents));
+    tunerNeedle.style.left = 50 + clampedCents + "%";
+
+    if (!practice.sequence.length) return;
+    var target = practice.sequence[practice.index];
+    if (practice.correctFlags[practice.index]) return; // already marked; wait for manual/auto advance
+
+    if (result.midi === target.midi && Math.abs(result.cents) <= IN_TUNE_CENTS) {
+      if (practice.matchStartTime === null) {
+        practice.matchStartTime = performance.now();
+      } else if (performance.now() - practice.matchStartTime >= SUSTAIN_MS) {
+        practice.correctFlags[practice.index] = true;
+        practiceFeedback.textContent = "✓ " + target.label + " — in tune!";
+        if (autoAdvanceCheckbox.checked) {
+          if (practice.index < practice.sequence.length - 1) {
+            practice.index++;
+            practice.matchStartTime = null;
+          } else {
+            practiceFeedback.textContent = "✓ Sequence complete!";
+          }
+        }
+        renderNoteStrip();
+      }
+    } else {
+      practice.matchStartTime = null;
+      if (result.midi !== target.midi) {
+        var semitones = result.midi - target.midi;
+        practiceFeedback.textContent =
+          "Target: " + target.label + " — hearing " + result.label + " (" + (semitones > 0 ? "+" : "") + semitones + " semitones)";
+      } else {
+        practiceFeedback.textContent =
+          "Target: " + target.label + " — " + Math.abs(result.cents).toFixed(0) + "¢ " + (result.cents > 0 ? "sharp" : "flat");
+      }
+    }
+  }
+
+  micToggleButton.addEventListener("click", function () {
+    if (MicTuner.isRunning()) {
+      MicTuner.stop();
+      micToggleButton.textContent = "Start listening";
+      micStatus.textContent = "Not listening";
+      handlePitch(null);
+      return;
+    }
+
+    micToggleButton.disabled = true;
+    MicTuner.start({
+      onStatus: function (text) {
+        micStatus.textContent = text;
+      },
+      onPitch: handlePitch,
+    })
+      .then(function () {
+        micToggleButton.textContent = "Stop listening";
+        micToggleButton.disabled = false;
+      })
+      .catch(function (err) {
+        micStatus.textContent = err.message || String(err);
+        micToggleButton.disabled = false;
+      });
+  });
+
+  // ---- end tuner + pitch practice ----
+
   function bowIntensity(pos) {
     var edge = 0.06;
     if (pos < edge) return pos / edge;
@@ -468,6 +628,16 @@
     bleConnectButton.disabled = true;
     bleConnectButton.title = "Bluetooth requires HTTPS (or localhost).";
     sensorStatus.textContent = "Serve this page over HTTPS to connect via Bluetooth — file playback still works.";
+  }
+
+  if (!MicTuner.isSupported()) {
+    micToggleButton.disabled = true;
+    micToggleButton.title = "Microphone access isn't available in this browser.";
+    micStatus.textContent = "Microphone not supported in this browser.";
+  } else if (!MicTuner.isSecureContext()) {
+    micToggleButton.disabled = true;
+    micToggleButton.title = "Microphone access requires HTTPS (or localhost).";
+    micStatus.textContent = "Serve this page over HTTPS to use the tuner.";
   }
 
   buildStringButtons();
