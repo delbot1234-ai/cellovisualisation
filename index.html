@@ -70,6 +70,100 @@
     </section>
   </main>
 
+  <section class="panel sensor-panel" aria-label="Wrist accelerometer sensor">
+    <h2>Wrist sensor (WitMotion)</h2>
+    <p class="hint">
+      Stream live data from a WitMotion BLE wrist sensor, or load a recorded
+      <code>.txt</code>/<code>.csv</code> export and play it back.
+    </p>
+
+    <div class="sensor-grid">
+      <div class="sensor-source">
+        <div class="control-buttons">
+          <button id="bleConnectButton">Connect via Bluetooth</button>
+          <label class="file-button" for="fileInput">Load recording
+            <input type="file" id="fileInput" accept=".txt,.csv" hidden />
+          </label>
+        </div>
+        <p class="status-line" id="sensorStatus">Not connected</p>
+        <p class="hint" id="fileWarning"></p>
+
+        <div class="playback-controls" id="playbackControls" hidden>
+          <button id="playbackToggle">Play</button>
+          <input type="range" id="playbackScrub" min="0" max="1" step="0.001" value="0" />
+          <label class="inline-label">Speed
+            <select id="playbackSpeed">
+              <option value="0.25">0.25×</option>
+              <option value="0.5">0.5×</option>
+              <option value="1" selected>1×</option>
+              <option value="2">2×</option>
+              <option value="4">4×</option>
+            </select>
+          </label>
+        </div>
+
+        <details class="advanced">
+          <summary>Advanced: manual UUIDs (if auto-connect fails)</summary>
+          <div class="control-group">
+            <label for="serviceUuidInput">Service UUID</label>
+            <input type="text" id="serviceUuidInput" placeholder="e.g. 0000ffe5-0000-1000-8000-00805f9a34fb" />
+          </div>
+          <div class="control-group">
+            <label for="charUuidInput">Notify characteristic UUID</label>
+            <input type="text" id="charUuidInput" placeholder="e.g. 0000ffe4-0000-1000-8000-00805f9a34fb" />
+          </div>
+          <p class="hint">
+            Find these with a generic BLE scanner app (e.g. nRF Connect) if the default WitMotion UUIDs
+            don't match your sensor.
+          </p>
+        </details>
+      </div>
+
+      <div class="sensor-readout">
+        <div class="readout-row">
+          <div class="readout-tile"><span class="readout-label">ax</span><span id="axValue">0.00</span> g</div>
+          <div class="readout-tile"><span class="readout-label">ay</span><span id="ayValue">0.00</span> g</div>
+          <div class="readout-tile"><span class="readout-label">az</span><span id="azValue">0.00</span> g</div>
+          <div class="readout-tile"><span class="readout-label">gx</span><span id="gxValue">0.00</span> °/s</div>
+          <div class="readout-tile"><span class="readout-label">gy</span><span id="gyValue">0.00</span> °/s</div>
+          <div class="readout-tile"><span class="readout-label">gz</span><span id="gzValue">0.00</span> °/s</div>
+        </div>
+        <div class="chart-toolbar">
+          <div class="chart-mode-buttons" id="chartModeButtons" role="radiogroup" aria-label="Chart channel">
+            <button type="button" data-mode="accel" class="active">Accelerometer</button>
+            <button type="button" data-mode="gyro">Gyroscope</button>
+          </div>
+        </div>
+        <canvas id="sensorChartCanvas" class="viz-canvas sensor-chart-canvas"></canvas>
+      </div>
+    </div>
+
+    <div class="control-group drive-bow-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="driveBowCheckbox" />
+        Drive the bow animation from this sensor (speed &amp; direction)
+      </label>
+      <div class="drive-bow-options" id="driveBowOptions">
+        <label for="axisSelect">Axis to use</label>
+        <select id="axisSelect">
+          <option value="gz">Gyro Z (gz)</option>
+          <option value="gy">Gyro Y (gy)</option>
+          <option value="gx">Gyro X (gx)</option>
+          <option value="ax">Accel X (ax)</option>
+          <option value="ay">Accel Y (ay)</option>
+          <option value="az">Accel Z (az)</option>
+        </select>
+        <label for="sensitivitySlider">Sensitivity <span class="value" id="sensitivityValue"></span></label>
+        <input type="range" id="sensitivitySlider" min="0.2" max="5" step="0.1" />
+      </div>
+    </div>
+
+    <details class="advanced">
+      <summary>Raw frame monitor (debug)</summary>
+      <pre class="raw-monitor" id="rawMonitor">Waiting for data…</pre>
+    </details>
+  </section>
+
   <footer class="app-footer">
     <details>
       <summary>What am I looking at? (the physics, briefly)</summary>
@@ -86,12 +180,27 @@
         simulation) to make the trends explorable and audible.
       </p>
     </details>
+    <details>
+      <summary>About the wrist sensor connection</summary>
+      <p>
+        Live streaming uses the <strong>Web Bluetooth API</strong>, which requires Chrome or Edge (desktop or
+        Android) over HTTPS or localhost &mdash; it isn't available on iOS at all. WitMotion sensors don't use a
+        single standardized GATT UUID across every model, so this app ships with the commonly used
+        WT901BLE/BWT901BLE values and falls back to scanning for any notifying characteristic; if it can't find
+        your sensor's data channel automatically, use the Advanced UUID fields once you've found them with a
+        generic BLE scanner app.
+      </p>
+    </details>
   </footer>
 
   <script src="js/physics.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/visualizer.js"></script>
   <script src="js/diagram.js"></script>
+  <script src="js/witmotionParser.js"></script>
+  <script src="js/sensorFileParser.js"></script>
+  <script src="js/bleConnector.js"></script>
+  <script src="js/sensorChart.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
