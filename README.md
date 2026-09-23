@@ -75,11 +75,19 @@ simulation — it's built to make the *trends* explorable and audible.
 - The note-sequence box takes note names like `C3`, `F#4`, `Bb2` (letter,
   optional `#`/`b`/`##`/`bb`, octave number), separated by spaces or commas.
   There's no automatic sheet-music/image reading built in (that's a hard,
-  unreliable problem to solve well) — if you share a photo of sheet music in
-  chat, it can be transcribed into this note-name format for you.
+  unreliable problem to solve well), so notes are transcribed into this
+  format by hand.
 - A note counts as "in tune" within ±15 cents, and has to hold for ~400ms
   before it's marked correct and (optionally) auto-advances to the next
   note.
+
+## Android app
+
+The app is also packaged for Google Play as a Trusted Web Activity (the
+hosted web app running full-screen inside Chrome, which keeps Web
+Bluetooth and the microphone working). It's installable as a PWA too, and
+works offline once loaded. See **[ANDROID.md](ANDROID.md)** for hosting,
+building, signing, and publishing steps.
 
 ## Running it
 
@@ -110,3 +118,8 @@ browsers require a user gesture before audio can play.
 - `js/pitchDetector.js` — autocorrelation-based pitch detection
 - `js/micTuner.js` — microphone capture + pitch detection loop
 - `js/main.js` — wires controls, state, and the animation loop together
+- `manifest.webmanifest`, `sw.js`, `icons/` — PWA manifest, offline service worker, app icons
+- `privacy.html` — privacy policy
+- `android/` — Android (Trusted Web Activity) project
+- `store/` — Google Play listing assets
+- `.github/workflows/` — GitHub Pages deployment and Android build

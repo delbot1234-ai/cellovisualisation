@@ -15,6 +15,7 @@ wrist-worn accelerometer/gyro sensor (WitMotion BLE).
 | Sensor file playback | Any modern browser. No special requirements. |
 | Live Bluetooth streaming | Chrome or Edge, desktop or Android. Requires HTTPS or `localhost` (Web Bluetooth is blocked on plain HTTP and unavailable on iOS entirely). |
 | Microphone tuner | Chrome, Firefox, Edge, or Safari. Requires HTTPS or `localhost` (`getUserMedia` needs a secure context, but unlike Web Bluetooth it does work on iOS Safari). |
+| Android app (Google Play) | Android 7.0+ (API 24) with Chrome installed. Packaged as a Trusted Web Activity that opens the GitHub Pages-hosted app in Chrome; it falls back to a Chrome Custom Tab, never a WebView, because WebView lacks Web Bluetooth. See `ANDROID.md`. |
 
 ## 1. Bowing simulation
 
@@ -189,6 +190,12 @@ js/noteUtils.js               Note name / MIDI / frequency conversions + sequenc
 js/pitchDetector.js            Autocorrelation-based pitch detection
 js/micTuner.js                  Microphone capture + pitch detection loop
 js/main.js                       Wires controls, state, and the animation loop together
+manifest.webmanifest, sw.js      PWA manifest + network-first offline service worker
+privacy.html                     Privacy policy
+android/                         Trusted Web Activity project (Gradle, androidbrowserhelper)
+store/                           Google Play listing assets
+.github/workflows/pages.yml      Deploys the web app to GitHub Pages
+.github/workflows/android.yml    Builds the debug APK and, with signing secrets, the Play .aab
 ```
 
 ## 6. Non-goals / known limitations

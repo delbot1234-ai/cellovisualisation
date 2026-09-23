@@ -26,7 +26,7 @@ CelloApp.Visualizer = (function () {
     var h = canvas.clientHeight;
     ctx.clearRect(0, 0, w, h);
 
-    var marginX = 64;
+    var marginX = w < 480 ? 36 : 64;
     var stringY = h * 0.4;
     var bridgeX = marginX;
     var fingerX = w - marginX;
@@ -40,7 +40,8 @@ CelloApp.Visualizer = (function () {
     ctx.stroke();
     ctx.fillStyle = "rgba(241,233,220,0.6)";
     ctx.font = "12px system-ui";
-    ctx.fillText("Bridge", bridgeX - 18, stringY + 46);
+    var bridgeW = ctx.measureText("Bridge").width;
+    ctx.fillText("Bridge", Math.max(4, bridgeX - bridgeW / 2), stringY + 46);
 
     // Fingerboard end
     ctx.strokeStyle = "#3a2a18";
@@ -50,13 +51,17 @@ CelloApp.Visualizer = (function () {
     ctx.lineTo(fingerX, stringY + 20);
     ctx.stroke();
     ctx.fillStyle = "rgba(241,233,220,0.6)";
-    ctx.fillText("Fingerboard", fingerX - 32, stringY + 46);
+    var fingerW = ctx.measureText("Fingerboard").width;
+    ctx.fillText("Fingerboard", Math.min(w - 4 - fingerW, fingerX - fingerW / 2), stringY + 46);
 
     ctx.fillStyle = "rgba(255,255,255,0.32)";
     ctx.font = "11px system-ui";
-    ctx.fillText("sul ponticello →", bridgeX + 4, stringY - 34);
+    var pontWidth = ctx.measureText("sul ponticello →").width;
     var tastoWidth = ctx.measureText("← sul tasto").width;
-    ctx.fillText("← sul tasto", fingerX - tastoWidth, stringY - 34);
+    if (pontWidth + tastoWidth + 24 < fingerX - bridgeX) {
+      ctx.fillText("sul ponticello →", bridgeX + 4, stringY - 34);
+      ctx.fillText("← sul tasto", fingerX - tastoWidth, stringY - 34);
+    }
 
     // String
     ctx.strokeStyle = state.stringColor || "#e3d9c6";
@@ -100,7 +105,7 @@ CelloApp.Visualizer = (function () {
       zone === "clean" ? "#8fd3ff" : zone === "crunch" ? "#ff8f6b" : "#c9c2ff";
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    var span = 70;
+    var span = Math.min(70, canvas.clientWidth * 0.12);
     for (var x = -span; x <= span; x += 2) {
       var n = jitter ? (Math.random() - 0.5) * jitter : 0;
       var envelope = Math.cos(((x / span) * Math.PI) / 2);
@@ -116,8 +121,9 @@ CelloApp.Visualizer = (function () {
 
   function drawBow(contactX, stringY, w, h, state) {
     var bowY = stringY + 88;
-    var bowTrackLeft = 70;
-    var bowTrackRight = w - 70;
+    var trackMargin = w < 480 ? 36 : 70;
+    var bowTrackLeft = trackMargin;
+    var bowTrackRight = w - trackMargin;
     var bowLen = Math.min(130, (bowTrackRight - bowTrackLeft) * 0.5);
     var travel = bowTrackRight - bowTrackLeft - bowLen;
     var bowX = bowTrackLeft + travel * state.bowPositionFrac;

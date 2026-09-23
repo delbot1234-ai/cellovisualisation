@@ -1,0 +1,65 @@
+plugins {
+    id "com.android.application"
+}
+
+def hostName = project.property("twaHostName")
+def launchUrl = project.property("twaLaunchUrl")
+def pathPrefix = project.property("twaPathPrefix")
+
+// Play rejects uploads that reuse a versionCode; CI passes its run number.
+def ciVersionCode = project.findProperty("versionCode")
+
+def keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+
+android {
+    namespace "io.github.delbot1234ai.cellobow"
+    compileSdk 36
+
+    defaultConfig {
+        // Permanent once published to Play — this is the app's identity.
+        applicationId "io.github.delbot1234ai.cellobow"
+        minSdk 24
+        targetSdk 36
+        versionCode ciVersionCode ? ciVersionCode.toInteger() : 1
+        versionName "1.0.0"
+
+        manifestPlaceholders = [
+            hostName  : hostName,
+            launchUrl : launchUrl,
+            pathPrefix: pathPrefix,
+        ]
+
+        resValue "string", "assetStatements",
+            '[{ \\"relation\\": [\\"delegate_permission/common.handle_all_urls\\"],' +
+            ' \\"target\\": {\\"namespace\\": \\"web\\", \\"site\\": \\"https://' + hostName + '\\"}}]'
+    }
+
+    signingConfigs {
+        if (keystorePath) {
+            release {
+                storeFile file(keystorePath)
+                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (keystorePath) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation "com.google.androidbrowserhelper:androidbrowserhelper:2.5.0"
+}

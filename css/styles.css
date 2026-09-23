@@ -47,9 +47,9 @@ html, body {
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 20px;
-  padding: 20px 28px 12px;
+  padding: 0 28px;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0 auto 20px;
 }
 
 @media (max-width: 860px) {
@@ -71,10 +71,16 @@ html, body {
   color: var(--wood-light);
 }
 
+.session-panel,
+.sensor-panel,
+.tuner-panel,
+.session-log-panel {
+  width: min(1144px, calc(100% - 56px));
+  margin: 0 auto 20px;
+}
+
 .session-panel {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 18px 28px;
+  margin-top: 16px;
 }
 
 .session-stats {
@@ -116,12 +122,6 @@ html, body {
   color: var(--crunch);
 }
 
-.session-log-panel {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px 28px;
-}
-
 .session-log-table {
   width: 100%;
   border-collapse: collapse;
@@ -159,6 +159,7 @@ html, body {
 .control-group label {
   display: flex;
   justify-content: space-between;
+  gap: 8px;
   font-size: 0.9rem;
   color: var(--text-dim);
   margin-bottom: 6px;
@@ -213,6 +214,17 @@ input[type="range"] {
 button {
   font-family: inherit;
   font-size: 0.9rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .control-buttons button {
@@ -282,12 +294,6 @@ button {
   border-radius: 50%;
   background: var(--clean);
   box-shadow: 0 0 8px currentColor;
-}
-
-.sensor-panel {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px 28px;
 }
 
 .sensor-panel h2 {
@@ -435,6 +441,10 @@ details.advanced input[type="text"] {
   margin-top: 18px;
 }
 
+.control-group .checkbox-label {
+  justify-content: flex-start;
+}
+
 .checkbox-label {
   display: flex;
   align-items: center;
@@ -477,12 +487,6 @@ details.advanced input[type="text"] {
   white-space: pre-wrap;
   word-break: break-all;
   margin: 8px 0 0;
-}
-
-.tuner-panel {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px 28px;
 }
 
 .tuner-panel h2 {
@@ -646,6 +650,15 @@ details.advanced input[type="text"] {
   min-height: 1.2em;
 }
 
+.footer-links {
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.footer-links a {
+  color: var(--text-dim);
+}
+
 .app-footer {
   max-width: 1200px;
   margin: 0 auto;
@@ -675,4 +688,54 @@ details.advanced input[type="text"] {
 .app-footer .disclaimer {
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.35);
+}
+
+@media (max-width: 600px) {
+  .app-header {
+    padding: 20px 16px 4px;
+  }
+
+  .app-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .app-main {
+    padding: 0 16px;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .session-panel,
+  .sensor-panel,
+  .tuner-panel,
+  .session-log-panel {
+    width: calc(100% - 32px);
+    margin-bottom: 16px;
+  }
+
+  .panel {
+    padding: 16px;
+  }
+
+  .session-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sequence-controls {
+    flex-wrap: wrap;
+  }
+
+  .sequence-controls span {
+    flex-basis: 100%;
+    order: -1;
+  }
+
+  .sequence-controls button {
+    flex: 1;
+    white-space: nowrap;
+  }
+
+  .app-footer {
+    padding: 4px 16px 32px;
+  }
 }

@@ -4,6 +4,12 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Cello Bow Motion Explorer</title>
+<meta name="description" content="Explore cello bowing physics, stream wrist-sensor motion, and practise intonation with a live tuner." />
+<meta name="theme-color" content="#16130f" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+<link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
 <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -224,8 +230,8 @@
       <label for="noteSequenceInput">Note sequence (e.g. from your sheet music)</label>
       <textarea id="noteSequenceInput" rows="2" placeholder="e.g. C3 D3 E3 F3 G3 A3 B3 C4"></textarea>
       <p class="hint">
-        Note names like <code>C3</code>, <code>F#4</code>, <code>Bb2</code>. Can't read sheet music directly —
-        if you share a photo of it in chat, I can transcribe it into this format for you.
+        Type note names separated by spaces, e.g. <code>C3</code>, <code>F#4</code>, <code>Bb2</code>
+        (letter, optional sharp/flat, octave number).
       </p>
       <div class="control-buttons">
         <button id="loadSequenceButton">Load sequence</button>
@@ -314,6 +320,7 @@
         pitch at a time.
       </p>
     </details>
+    <p class="footer-links"><a href="privacy.html">Privacy policy</a></p>
   </footer>
 
   <script src="js/physics.js"></script>
@@ -328,5 +335,10 @@
   <script src="js/pitchDetector.js"></script>
   <script src="js/micTuner.js"></script>
   <script src="js/main.js"></script>
+  <script>
+    if ("serviceWorker" in navigator && window.isSecureContext) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
 </body>
 </html>

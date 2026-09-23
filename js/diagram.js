@@ -55,10 +55,28 @@ CelloApp.Diagram = (function () {
 
     ctx.fillStyle = "rgba(255,255,255,0.55)";
     ctx.font = "11px system-ui";
+
+    // Use the longest label variant that fits the available width.
+    function fitLabel(variants, maxWidth) {
+      for (var i = 0; i < variants.length; i++) {
+        if (ctx.measureText(variants[i]).width <= maxWidth) return variants[i];
+      }
+      return variants[variants.length - 1];
+    }
+
     ctx.fillText("force (g)", 4, padT - 12);
-    ctx.fillText("sounding point: bridge → fingerboard (cm)", padL, h - 4);
-    ctx.fillText("crunch (too much force)", padL + plotW - 150, padT - 12);
-    ctx.fillText("whistle / surface sound (too little force)", padL, padT + plotH + 30 <= h ? h - 18 : h - 18);
+    ctx.fillText(
+      fitLabel(["sounding point: bridge → fingerboard (cm)", "bridge → fingerboard (cm)"], w - padL - 4),
+      padL,
+      h - 4
+    );
+    var crunchLabel = fitLabel(["crunch (too much force)", "crunch"], plotW - 60);
+    ctx.fillText(crunchLabel, padL + plotW - ctx.measureText(crunchLabel).width, padT - 12);
+    ctx.fillText(
+      fitLabel(["whistle / surface sound (too little force)", "whistle (too little force)"], w - padL - 4),
+      padL,
+      h - 18
+    );
 
     var steps = 40;
     var minPts = [];
