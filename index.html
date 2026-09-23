@@ -12,6 +12,32 @@
     <p class="subtitle">Explore how bow speed, force, sounding point, and tilt shape a cello's tone — visually and audibly.</p>
   </header>
 
+  <section class="panel session-panel" aria-label="Practice session summary">
+    <h2>Session</h2>
+    <p class="hint">
+      A live view across the tuner, note sequence, and wrist sensor — start listening below and load a note
+      sequence to fill this in.
+    </p>
+    <div class="session-stats">
+      <div class="session-stat">
+        <span class="session-stat-label">Target note</span>
+        <span class="session-stat-value" id="sessionTarget">––</span>
+      </div>
+      <div class="session-stat">
+        <span class="session-stat-label">Detected pitch</span>
+        <span class="session-stat-value" id="sessionDetected">––</span>
+      </div>
+      <div class="session-stat">
+        <span class="session-stat-label">Wrist sensor</span>
+        <span class="session-stat-value" id="sessionSensor">Not connected</span>
+      </div>
+      <div class="session-stat">
+        <span class="session-stat-label">Progress</span>
+        <span class="session-stat-value" id="sessionProgress">––</span>
+      </div>
+    </div>
+  </section>
+
   <main class="app-main">
     <section class="panel controls" aria-label="Bowing controls">
       <h2>Bow controls</h2>
@@ -220,6 +246,35 @@
       </div>
       <p class="practice-feedback" id="practiceFeedback"></p>
     </div>
+  </section>
+
+  <section class="panel session-log-panel" aria-label="Session log">
+    <h2>Session log</h2>
+    <p class="hint">
+      Each note you play in tune is logged here, together with your bow speed from the wrist sensor at that
+      moment (when connected and driving the animation) — a record tying your sheet-music sequence, intonation,
+      and bow motion together.
+    </p>
+    <div class="control-buttons">
+      <button id="clearLogButton">Clear log</button>
+      <button id="downloadLogButton">Download CSV</button>
+    </div>
+    <table class="session-log-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Note</th>
+          <th>Cents off</th>
+          <th>Bow speed</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="sessionLogBody">
+        <tr class="session-log-empty">
+          <td colspan="5">Notes you play in tune will appear here.</td>
+        </tr>
+      </tbody>
+    </table>
   </section>
 
   <footer class="app-footer">

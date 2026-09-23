@@ -153,7 +153,26 @@ A live meter shows the detected note name, frequency, and a needle on a
   as a semitone offset) from the right note out of tune (shown as cents
   sharp/flat).
 
-## 4. File structure
+## 4. Session view
+
+A "Session" panel (top of the page) and "Session log" panel (below the
+tuner) coordinate the three subsystems above into one view, without adding
+new start/stop controls of their own — they're derived from existing state:
+
+- **Live summary** (updated every animation frame and on each pitch
+  detection): current target note, detected pitch (colored green/red for
+  in-tune/out-of-tune against the target), wrist sensor connection state
+  plus live bow speed (only shown when a sensor is connected **and**
+  driving the bow animation — otherwise bow speed isn't real motion data),
+  and sequence progress (`x / n notes`).
+- **Session log**: each time a note is marked correct in the practice
+  sequence, a row is appended recording the note, cents-accuracy at the
+  moment of the match, bow speed from the wrist sensor at that same moment
+  (or "—" if no sensor was driving the animation), and a timestamp. This is
+  the one artifact that actually correlates sheet-music sequence position,
+  intonation, and real bow motion. Exportable as CSV; clearable.
+
+## 5. File structure
 
 ```
 index.html              Page structure and controls
@@ -172,7 +191,7 @@ js/micTuner.js                  Microphone capture + pitch detection loop
 js/main.js                       Wires controls, state, and the animation loop together
 ```
 
-## 5. Non-goals / known limitations
+## 6. Non-goals / known limitations
 
 - The bow-force physics model is pedagogically tuned, not a calibrated
   acoustic simulation.

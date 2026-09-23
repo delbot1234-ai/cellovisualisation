@@ -28,6 +28,12 @@ real time.
   practice mode: type in a sequence of notes (e.g. transcribed from sheet
   music) and it tracks which note you're on, auto-advancing once you play
   each one in tune.
+- **Session view** — a live summary bar (target note, detected pitch, wrist
+  sensor status, sequence progress) and a session log: every note you play
+  in tune is recorded with its cents-accuracy, your bow speed from the
+  wrist sensor at that moment (when connected and driving the animation),
+  and a timestamp — one record tying your sheet-music sequence, intonation,
+  and bow motion together. Exportable as CSV.
 
 The force/speed/sounding-point relationship is a simplified, pedagogically
 tuned model (inspired by Schelleng's bowing diagram), not a precise acoustic

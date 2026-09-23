@@ -76,6 +76,14 @@
   var sequenceProgress = document.getElementById("sequenceProgress");
   var practiceFeedback = document.getElementById("practiceFeedback");
 
+  var sessionTarget = document.getElementById("sessionTarget");
+  var sessionDetected = document.getElementById("sessionDetected");
+  var sessionSensor = document.getElementById("sessionSensor");
+  var sessionProgress = document.getElementById("sessionProgress");
+  var clearLogButton = document.getElementById("clearLogButton");
+  var downloadLogButton = document.getElementById("downloadLogButton");
+  var sessionLogBody = document.getElementById("sessionLogBody");
+
   var DEFAULTS = {
     stringId: "D",
     speed: 30,
@@ -420,6 +428,7 @@
     practice.index = Math.max(0, Math.min(practice.sequence.length - 1, i));
     practice.matchStartTime = null;
     renderNoteStrip();
+    updateSessionSummary();
   }
 
   loadSequenceButton.addEventListener("click", function () {
@@ -437,6 +446,7 @@
     practice.matchStartTime = null;
     practiceFeedback.textContent = "";
     renderNoteStrip();
+    updateSessionSummary();
   });
 
   prevNoteButton.addEventListener("click", function () {
@@ -453,14 +463,115 @@
     practice.matchStartTime = null;
     practiceFeedback.textContent = "";
     renderNoteStrip();
+    updateSessionSummary();
   });
 
+  // ---- Session: live summary + log tying the tuner, sequence, and sensor together ----
+
+  var sessionLog = [];
+  var lastPitchResult = null;
+
+  function currentBowSpeedLabel() {
+    if (sensor.driveBow && sensor.latestSample && sensor.mode !== "off") {
+      return state.speed.toFixed(1) + " cm/s";
+    }
+    return "—";
+  }
+
+  function updateSessionSummary() {
+    sessionTarget.textContent = practice.sequence.length ? practice.sequence[practice.index].label : "––";
+
+    if (lastPitchResult) {
+      sessionDetected.textContent = lastPitchResult.label + " (" + lastPitchResult.freq.toFixed(1) + " Hz)";
+      var inTune = practice.sequence.length && lastPitchResult.midi === practice.sequence[practice.index].midi && Math.abs(lastPitchResult.cents) <= IN_TUNE_CENTS;
+      sessionDetected.classList.toggle("in-tune", !!inTune);
+      sessionDetected.classList.toggle("out-of-tune", practice.sequence.length > 0 && !inTune);
+    } else {
+      sessionDetected.textContent = "––";
+      sessionDetected.classList.remove("in-tune", "out-of-tune");
+    }
+
+    if (sensor.mode === "off") {
+      sessionSensor.textContent = "Not connected";
+    } else if (sensor.driveBow && sensor.latestSample) {
+      sessionSensor.textContent = (sensor.mode === "live" ? "Live" : "Playback") + " — " + currentBowSpeedLabel();
+    } else {
+      sessionSensor.textContent = sensor.mode === "live" ? "Connected" : "Recording loaded";
+    }
+
+    sessionProgress.textContent = practice.sequence.length
+      ? practice.correctFlags.filter(Boolean).length + " / " + practice.sequence.length + " notes"
+      : "––";
+  }
+
+  function clearLogEmptyState() {
+    var emptyRow = sessionLogBody.querySelector(".session-log-empty");
+    if (emptyRow) emptyRow.remove();
+  }
+
+  function appendLogRow(entry) {
+    clearLogEmptyState();
+    var tr = document.createElement("tr");
+    [entry.index, entry.note, entry.cents + "¢", entry.bowSpeed, entry.time].forEach(function (value) {
+      var td = document.createElement("td");
+      td.textContent = value;
+      tr.appendChild(td);
+    });
+    sessionLogBody.appendChild(tr);
+  }
+
+  function logCorrectNote(target, cents) {
+    var entry = {
+      index: sessionLog.length + 1,
+      note: target.label,
+      cents: cents.toFixed(1),
+      bowSpeed: currentBowSpeedLabel(),
+      time: new Date().toLocaleTimeString(),
+    };
+    sessionLog.push(entry);
+    appendLogRow(entry);
+  }
+
+  clearLogButton.addEventListener("click", function () {
+    sessionLog = [];
+    sessionLogBody.innerHTML = "";
+    var tr = document.createElement("tr");
+    tr.className = "session-log-empty";
+    var td = document.createElement("td");
+    td.colSpan = 5;
+    td.textContent = "Notes you play in tune will appear here.";
+    tr.appendChild(td);
+    sessionLogBody.appendChild(tr);
+  });
+
+  downloadLogButton.addEventListener("click", function () {
+    if (!sessionLog.length) return;
+    var header = "Index,Note,CentsOff,BowSpeed,Time\n";
+    var rows = sessionLog.map(function (e) {
+      return [e.index, e.note, e.cents, e.bowSpeed, e.time].join(",");
+    });
+    var csv = header + rows.join("\n");
+    var blob = new Blob([csv], { type: "text/csv" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "cello-session-log.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  // ---- end session ----
+
   function handlePitch(result) {
+    lastPitchResult = result;
     if (!result) {
       tunerNote.textContent = "––";
       tunerFreq.textContent = "–– Hz";
       tunerNeedle.style.left = "50%";
       practice.matchStartTime = null;
+      updateSessionSummary();
       return;
     }
 
@@ -468,6 +579,7 @@
     tunerFreq.textContent = result.freq.toFixed(1) + " Hz";
     var clampedCents = Math.max(-50, Math.min(50, result.cents));
     tunerNeedle.style.left = 50 + clampedCents + "%";
+    updateSessionSummary();
 
     if (!practice.sequence.length) return;
     var target = practice.sequence[practice.index];
@@ -479,6 +591,7 @@
       } else if (performance.now() - practice.matchStartTime >= SUSTAIN_MS) {
         practice.correctFlags[practice.index] = true;
         practiceFeedback.textContent = "✓ " + target.label + " — in tune!";
+        logCorrectNote(target, result.cents);
         if (autoAdvanceCheckbox.checked) {
           if (practice.index < practice.sequence.length - 1) {
             practice.index++;
@@ -488,6 +601,7 @@
           }
         }
         renderNoteStrip();
+        updateSessionSummary();
       }
     } else {
       practice.matchStartTime = null;
@@ -608,6 +722,8 @@
         bowIntensity: bowIntensity(state.bowPositionFrac),
       });
     }
+
+    updateSessionSummary();
 
     requestAnimationFrame(tick);
   }

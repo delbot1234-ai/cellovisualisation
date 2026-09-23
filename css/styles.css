@@ -71,6 +71,87 @@ html, body {
   color: var(--wood-light);
 }
 
+.session-panel {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 28px;
+}
+
+.session-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.session-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.session-stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+.session-stat-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.session-stat-value.in-tune {
+  color: var(--clean);
+}
+
+.session-stat-value.out-of-tune {
+  color: var(--crunch);
+}
+
+.session-log-panel {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 28px;
+}
+
+.session-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 0.88rem;
+}
+
+.session-log-table th {
+  text-align: left;
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.session-log-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.session-log-table tr.session-log-empty td {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
 .control-group {
   margin-bottom: 18px;
 }
