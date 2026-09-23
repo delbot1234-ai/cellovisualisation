@@ -98,7 +98,9 @@ number), so Play never rejects an upload for reusing one.
 5. Fill in the listing and policy forms:
    - **Store listing**: app icon `store/icon-512.png`, feature graphic
      `store/feature-graphic-1024x500.png`, phone screenshots
-     `store/screenshot-*.png`.
+     `store/screenshot-*.png`. For the optional promo video, upload
+     `store/demo-video.mp4` to YouTube (public or unlisted) and paste the
+     link — Play only accepts YouTube URLs.
    - **Privacy policy URL**:
      `https://delbot1234-ai.github.io/cellovisualisation/privacy.html`
    - **Data safety**: the app collects and shares **no** user data.
